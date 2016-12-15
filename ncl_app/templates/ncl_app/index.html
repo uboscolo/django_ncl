@@ -1,0 +1,44 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'ncl_app/style.css' %}" />
+
+{% if league_list %}
+    {% for league in league_list %}
+        <h1>{{ league.name }}</h1>
+        <form action="{% url 'ncl_app:regular_season' league.id %}" method="post">
+            {% csrf_token %}
+            <input type="submit" value="Create Regular Season Schedule" />
+        </form>
+        <table border="3" cellpadding="10" cellspacing="10">
+            <tr>
+                {% for conference in league.conference_set.all %}
+                    <th>{{ conference.name }}</th>
+                {% endfor %}
+            </tr>
+            <tr>
+                {% for conference in league.conference_set.all %}
+                    <td>
+                        <table border="1" cellpadding="10" cellspacing="10">
+                            <tr>
+                                {% for division in conference.division_set.all %}
+                                    <th>{{ division.name }}</th>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                {% for division in conference.division_set.all %}
+                                    <td>
+                                        {% for team in division.team_set.all %}
+                                            <p>{{ team.name }}</p>
+                                        {% endfor %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        </table>
+                    </td>
+                {% endfor %}
+            </tr>
+        </table>
+    {% endfor %}
+{% else %}
+    <h1>No leagues are available.</h1>
+{% endif %}

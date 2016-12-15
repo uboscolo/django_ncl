@@ -1,0 +1,43 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'ncl_app/style.css' %}" />
+
+{% if league %}
+    <h1>{{ league.name }} - Regular Season</h1>
+    <form action="{% url 'ncl_app:regular_season_day' league.id %}" method="post">
+        {% csrf_token %}
+        <input type="submit" value="Play Regular Season Schedule" />
+    </form>
+{% else %}
+    <h1>Regular Season</h1>
+{% endif %}
+
+{% if schedule_list %}
+    <table border="3" cellpadding="10" cellspacing="10">
+        <tr>
+            {% for schedule in schedule_list %}
+                <th>{{ schedule.name }}</th>
+            {% endfor %}
+        </tr>
+        <tr>
+            {% for schedule in schedule_list %}
+                <td>
+                    <table border="1" cellpadding="10" cellspacing="10">
+                        {% for day in schedule.sorted_day_set.all %}
+                            <tr>
+                                <th>Day {{ day.number }}</th>
+                            </tr>
+                            {% for match in day.match_set.all %}
+                                <tr>
+                                    <td>{{ match.home_team.name }}<br>vs.<br>{{ match.away_team.name }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    </table>
+                </td>
+            {% endfor %}
+        </tr>
+    </table>
+{% else %}
+    <h1>No schedules are available.</h1>
+{% endif %}
