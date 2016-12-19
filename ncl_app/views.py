@@ -38,8 +38,7 @@ def regular_season(request, league_id):
     league = get_object_or_404(models.League, pk=league_id)
     for conference in league.conference_set.all():
         for division in conference.division_set.all():
-            regular_season_schedule = division.create_regular_season_schedule()
-            regular_season_schedule.create_regular_season()
+            division.create_regular_season_schedule()
 
     context = {'schedule_list': models.Schedule.objects.all(), 'league': league}
     return render(request, 'ncl_app/regular_season.html', context)
@@ -61,8 +60,7 @@ def regular_season_day(request, league_id):
     league = get_object_or_404(models.League, pk=league_id)
     for conference in league.conference_set.all():
         for division in conference.division_set.all():
-            for schedule in division.schedule_set.all():
-                schedule.play_regular_season()
+            division.play_regular_season_schedule()
 
     context = {'schedule_list': models.Schedule.objects.all(), 'league': league}
     return render(request, 'ncl_app/regular_season_day.html', context)

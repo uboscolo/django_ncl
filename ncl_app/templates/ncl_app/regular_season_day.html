@@ -32,7 +32,7 @@
                             {% for match in schedule.get_current_day.match_set.all %}
                                 <tr>
                                     <td>{{ match.home_team.name }}<br>vs.<br>{{ match.away_team.name }}<br>
-                                        {{ match.result.score }}
+                                        {{ match.score }}
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -40,7 +40,7 @@
                                 <th>Table</th>
                             </tr>
                             <td>
-                                {% for team in schedule.division.sorted_team_set.all %}
+                                {% for team in schedule.get_division.sorted_team_set.all %}
                                     {{ team.name }}: {{ team.points }}<br>
                                 {% endfor %}
                             </td>

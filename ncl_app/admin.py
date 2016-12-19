@@ -10,5 +10,4 @@ admin.site.register(models.Schedule)
 admin.site.register(models.Day)
 admin.site.register(models.Series)
 admin.site.register(models.Match)
-
-
+admin.site.register(models.MatchPart)

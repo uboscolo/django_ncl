@@ -27,82 +27,11 @@ class Conference(models.Model):
         return self.name
 
 
-class Division(models.Model):
-    """ Implements a Division object """
-
-    # Class variables
-    name = models.CharField(max_length=128)
-    conference = models.ForeignKey(Conference)
-
-    def __str__(self):
-        """ __str__ overwrite """
-        return self.name
-
-    @property
-    def sorted_team_set(self):
-        """ returns a list of teams in a descending order by points"""
-        return self.team_set.order_by('points').reverse()
-
-    def create_regular_season_schedule(self):
-        """ creates regular season schedule
-            It first reset all teams' points, then it deletes an existing
-            schedule with the same name if it exists. It then creates and
-            returns a new schedule
-
-        :return: the new schedule
-        :rtype: Schedule object
-        """
-        # Reset all teams points
-        for team in self.team_set.all():
-            team.reset_points()
-        # Delete existing schedules
-        try:
-            schedule = self.schedule_set.get(name=self.name)
-        except Schedule.DoesNotExist:
-            pass
-        else:
-            schedule.delete()
-        # Create a new schedule
-        schedule = Schedule(name=self.name, division=self, current_day=0, completed=False)
-        schedule.save()
-
-        return schedule
-
-
-class Team(models.Model):
-    """ Implements a Team object """
-
-    # Class variables
-    name = models.CharField(max_length=128)
-    points = models.IntegerField(default=0)
-    strength = models.DecimalField(max_digits=7, decimal_places=4)
-    division = models.ForeignKey(Division)
-
-    def __str__(self):
-        """ __str__ overwrite """
-        return self.name
-
-    def update_points(self, value):
-        """ update points
-
-        :param value: points
-        :return: None
-        """
-        self.points += value
-        self.save()
-
-    def reset_points(self):
-        """ reset points """
-        self.points = 0
-        self.save()
-
-
 class Schedule(models.Model):
     """ Implements a Schedule object """
 
     # Class variables
     name = models.CharField(max_length=128)
-    division = models.ForeignKey(Division)
     current_day = models.IntegerField(default=0)
     completed = models.BooleanField(default=False)
 
@@ -120,7 +49,18 @@ class Schedule(models.Model):
         """ returns current day """
         return self.day_set.get(number=self.current_day)
 
-    def create_regular_season(self):
+    @property
+    def get_division(self):
+        """ returns division """
+        return self.division_set.get(name=self.name)
+
+    def reset(self):
+        """ resets schedule """
+        self.current_day = 0
+        self.save()
+        self.day_set.all().delete()
+
+    def create_regular_season(self, team_list):
         """ creates a regular season schedule
             It first arranges all the division's team into a rotating table
             that is used to create a round robin schedule.
@@ -130,10 +70,10 @@ class Schedule(models.Model):
             home and away teams are reversed)
             It uses the rotating table to fill out the matches' teams accordingly.
 
+        :param team_list: List of teams
         :return: None
         """
 
-        team_list = self.division.team_set.all()
         rotating_table = {}
         for team_idx in range(0, len(team_list)):
             rotating_table[team_idx + 1] = team_list[team_idx]
@@ -229,21 +169,84 @@ class Schedule(models.Model):
                 # Take decision
                 match_phase = "regular_time"
                 if rel_strength_ratio > 2:
-                    outcome = '1'
+                    match.outcome = '1'
                     match.home_team.update_points(3)
                 elif rel_strength_ratio < 0.5:
-                    outcome = '2'
+                    match.outcome = '2'
                     match.away_team.update_points(3)
                 else:
-                    outcome = 'X'
+                    match.outcome = 'X'
                     match.home_team.update_points(1)
                     match.away_team.update_points(1)
                 # Generate score based on results
-                score = match.generate_score(match_phase=match_phase, match_result=outcome)
-                result = Result(score=score, outcome=outcome)
-                result.save()
-                match.result = result
+                score = match.generate_score(match_phase=match_phase, match_result=match.outcome)
+                match.score = score
                 match.save()
+
+
+class Division(models.Model):
+    """ Implements a Division object """
+
+    # Class variables
+    name = models.CharField(max_length=128)
+    conference = models.ForeignKey(Conference)
+    schedule = models.ForeignKey(Schedule)
+
+    def __str__(self):
+        """ __str__ overwrite """
+        return self.name
+
+    @property
+    def sorted_team_set(self):
+        """ returns a list of teams in a descending order by points"""
+        return self.team_set.order_by('points').reverse()
+
+    def create_regular_season_schedule(self):
+        """ creates regular season schedule
+            It first reset all teams' points, then resets the schedule
+
+        :return: None
+        """
+        # Reset all teams points
+        for team in self.team_set.all():
+            team.reset_points()
+        self.schedule.reset()
+        self.schedule.create_regular_season(self.team_set.all())
+
+    def play_regular_season_schedule(self):
+        """ plays regular season schedule
+
+        :return: None
+        """
+        self.schedule.play_regular_season()
+
+
+class Team(models.Model):
+    """ Implements a Team object """
+
+    # Class variables
+    name = models.CharField(max_length=128)
+    points = models.IntegerField(default=0)
+    strength = models.DecimalField(max_digits=7, decimal_places=4)
+    division = models.ForeignKey(Division)
+
+    def __str__(self):
+        """ __str__ overwrite """
+        return self.name
+
+    def update_points(self, value):
+        """ update points
+
+        :param value: points
+        :return: None
+        """
+        self.points += value
+        self.save()
+
+    def reset_points(self):
+        """ reset points """
+        self.points = 0
+        self.save()
 
 
 class Day(models.Model):
@@ -258,19 +261,6 @@ class Day(models.Model):
         return self.schedule.name + " - Day " + str(self.number)
 
 
-class Result(models.Model):
-    """ Implements a Result object """
-
-    # Class variables
-    OUTCOMES = (
-        ('X', 'draw'),
-        ('1', 'home'),
-        ('2', 'away'),
-    )
-    score = models.CharField(max_length=10)
-    outcome = models.CharField(max_length=1, choices=OUTCOMES)
-
-
 class Series(models.Model):
     """ Implements a Match object """
 
@@ -278,6 +268,10 @@ class Series(models.Model):
     name = models.CharField(max_length=128)
     winner = models.ForeignKey(Team, related_name="series_winner", null=True)
     loser = models.ForeignKey(Team, related_name="series_loser", null=True)
+
+    class Meta:
+        """ Meta class """
+        verbose_name_plural = "Series"
 
     def __str__(self):
         """ __str__ overwrite """
@@ -288,11 +282,21 @@ class Match(models.Model):
     """ Implements a Match object """
 
     # Class variables
+    OUTCOMES = (
+        ('X', 'draw'),
+        ('1', 'home'),
+        ('2', 'away'),
+    )
     teams = models.ManyToManyField(Team, through='MatchPart')
     day = models.ForeignKey(Day)
-    result = models.ForeignKey(Result, null=True)
+    score = models.CharField(max_length=10, default='0-0')
+    outcome = models.CharField(max_length=1, choices=OUTCOMES, null=True)
     home_advantage = models.BooleanField(default=True)
     series = models.ForeignKey(Series, null=True)
+
+    class Meta:
+        """ Meta class """
+        verbose_name_plural = "Matches"
 
     def __str__(self):
         """ __str__ overwrite """
