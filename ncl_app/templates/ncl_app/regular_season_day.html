@@ -1,15 +1,17 @@
 {% load static %}
 
-<link rel="stylesheet" type="text/css" href="{% static 'ncl_app/style.css' %}" />
+<!--<link rel="stylesheet" type="text/css" href="{% static 'ncl_app/style.css' %}" />-->
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/base.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/dashboard.css' %}" />
 
 {% if league %}
     <h1><a href="{% url 'ncl_app:index' %}">{{ league.name }} - Regular Season</a></h1>
-    <h2><a href="{% url 'ncl_app:regular_season_day' league.id %}">Play Regular Season</a></h2>
 {% else %}
-    <h1>Regular Season</h1>
+    <h1>No league available</h1>
 {% endif %}
 
 {% if schedule_list %}
+    <h2><a href="{% url 'ncl_app:regular_season_day' league.id %}">Play Regular Season</a></h2>
     <table border="3" cellpadding="10" cellspacing="10">
         <tr>
             {% for schedule in schedule_list %}
@@ -18,35 +20,57 @@
         </tr>
         <tr>
             {% for schedule in schedule_list %}
-                {% if schedule.completed %}
-                    <th>Regular Season is over</th>
-                {% else %}
-                    <td>
-                        <table border="1" cellpadding="10" cellspacing="10">
+                <td>
+                    <table border="1" cellpadding="10" cellspacing="10">
+                        <tr>
+                            <th>Day {{ schedule.current_day }}</th>
+                        </tr>
+                        {% for match in schedule.get_current_day.match_set.all %}
                             <tr>
-                                <th>Day {{ schedule.current_day }}</th>
+                                <td>{{ match.home_team.name }}<br>vs.<br>{{ match.away_team.name }}<br>
+                                    {{ match.score }}
+                                </td>
                             </tr>
-                            {% for match in schedule.get_current_day.match_set.all %}
-                                <tr>
-                                    <td>{{ match.home_team.name }}<br>vs.<br>{{ match.away_team.name }}<br>
-                                        {{ match.score }}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            <tr>
-                                <th>Table</th>
-                            </tr>
+                        {% endfor %}
+                        <tr>
+                            <th>Table</th>
+                        </tr>
+                        <tr>
                             <td>
                                 {% for team in schedule.get_division.sorted_team_set.all %}
                                     {{ team.name }}: {{ team.points }}<br>
                                 {% endfor %}
                             </td>
-                        </table>
-                    </td>
-                {% endif %}
+                        </tr>
+                    </table>
+                </td>
             {% endfor %}
         </tr>
     </table>
 {% else %}
-    <h1>No schedules are available.</h1>
+    <h1>Regular Season is over</h1>
+    <table border="3" cellpadding="10" cellspacing="10">
+        <tr>
+            {% for division in division_list %}
+                <th>{{ division.name }}</th>
+            {% endfor %}
+        </tr>
+        <tr>{% for division in division_list %}
+                <td>
+                    <table border="1" cellpadding="10" cellspacing="10">
+                        <tr>
+                            <th>Table</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                {% for team in division.sorted_team_set.all %}
+                                    {{ team.name }}: {{ team.points }}<br>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            {% endfor %}
+        </tr>
+    </table>
 {% endif %}

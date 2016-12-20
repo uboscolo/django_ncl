@@ -9,6 +9,7 @@ class League(models.Model):
 
     # Class variables
     name = models.CharField(max_length=128)
+    postseason = models.BooleanField(default=False)
 
     def __str__(self):
         """ __str__ overwrite """
@@ -25,10 +26,14 @@ class League(models.Model):
     def play_regular_season(self):
         """ plays regular season by calling conferences method
 
-        :return: None
+        :return: True or False if completed
+        :rtype: bool
         """
+        completed = False
         for conference in self.conference_set.all():
-            conference.play_regular_season()
+            completed = completed or conference.play_regular_season()
+
+        return completed
 
 
 class Conference(models.Model):
@@ -53,10 +58,14 @@ class Conference(models.Model):
     def play_regular_season(self):
         """ plays regular season by calling division method
 
-        :return: None
+        :return: True or False if completed
+        :rtype: bool
         """
+        completed = False
         for division in self.division_set.all():
-            division.play_regular_season_schedule()
+            completed = completed or division.play_regular_season_schedule()
+
+        return completed
 
 
 class Schedule(models.Model):
@@ -89,6 +98,7 @@ class Schedule(models.Model):
     def reset(self):
         """ resets schedule """
         self.current_day = 0
+        self.completed = False
         self.save()
         self.day_set.all().delete()
 
@@ -248,9 +258,12 @@ class Division(models.Model):
     def play_regular_season_schedule(self):
         """ plays regular season schedule
 
-        :return: None
+        :return: True/False if schedule is completed
+        :rtype: bool
         """
         self.schedule.play_regular_season()
+
+        return self.schedule.completed
 
 
 class Team(models.Model):

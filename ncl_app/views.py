@@ -43,6 +43,13 @@ class RegularSeasonDayView(generic.DetailView):
         """ returns the context data """
         context = super().get_context_data(**kwargs)
         league = context.get('league')
-        league.play_regular_season()
-        context['schedule_list'] = models.Schedule.objects.all()
+        completed = league.play_regular_season()
+        if not completed:
+            context['schedule_list'] = models.Schedule.objects.all()
+        else:
+            if league.postseason:
+                # create playoffs
+                pass
+            context['division_list'] = models.Division.objects.all()
+
         return context

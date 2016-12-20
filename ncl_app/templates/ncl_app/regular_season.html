@@ -1,15 +1,17 @@
 {% load static %}
 
-<link rel="stylesheet" type="text/css" href="{% static 'ncl_app/style.css' %}" />
+<!--<link rel="stylesheet" type="text/css" href="{% static 'ncl_app/style.css' %}" />-->
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/base.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/dashboard.css' %}" />
 
 {% if league %}
     <h1><a href="{% url 'ncl_app:index' %}">{{ league.name }} - Regular Season</a></h1>
-    <h2><a href="{% url 'ncl_app:regular_season_day' league.id %}">Play Regular Season</a></h2>
 {% else %}
-    <h1>Regular Season</h1>
+    <h1>No league available</h1>
 {% endif %}
 
 {% if schedule_list %}
+    <h2><a href="{% url 'ncl_app:regular_season_day' league.id %}">Play Regular Season</a></h2>
     <table border="3" cellpadding="10" cellspacing="10">
         <tr>
             {% for schedule in schedule_list %}
