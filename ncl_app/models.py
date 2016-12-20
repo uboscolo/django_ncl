@@ -14,6 +14,22 @@ class League(models.Model):
         """ __str__ overwrite """
         return self.name
 
+    def create_regular_season(self):
+        """ creates regular season by calling conferences method
+
+        :return: None
+        """
+        for conference in self.conference_set.all():
+            conference.create_regular_season()
+
+    def play_regular_season(self):
+        """ plays regular season by calling conferences method
+
+        :return: None
+        """
+        for conference in self.conference_set.all():
+            conference.play_regular_season()
+
 
 class Conference(models.Model):
     """ Implements a Conference object """
@@ -25,6 +41,22 @@ class Conference(models.Model):
     def __str__(self):
         """ __str__ overwrite """
         return self.name
+
+    def create_regular_season(self):
+        """ creates regular season by calling division method
+
+        :return: None
+        """
+        for division in self.division_set.all():
+            division.create_regular_season_schedule()
+
+    def play_regular_season(self):
+        """ plays regular season by calling division method
+
+        :return: None
+        """
+        for division in self.division_set.all():
+            division.play_regular_season_schedule()
 
 
 class Schedule(models.Model):
@@ -300,7 +332,7 @@ class Match(models.Model):
 
     def __str__(self):
         """ __str__ overwrite """
-        return str(self.day.number)
+        return "Day " + str(self.day.number) + " - " + self.home_team.name + " vs. " + self.away_team.name
 
     @property
     def home_team(self):
@@ -373,4 +405,4 @@ class MatchPart(models.Model):
     def __str__(self):
         """ __str__ overwrite """
 
-        return self.team.name
+        return self.team.name + " in " + self.match.__str__()

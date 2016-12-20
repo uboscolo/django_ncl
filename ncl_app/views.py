@@ -11,56 +11,38 @@ class IndexView(generic.ListView):
     """
     # Class variables
     template_name = 'ncl_app/index.html'
-
-    def get_queryset(self):
-        """
-        Returns a list of one league
-
-        :return: list of one league ordered by name
-        :rtype: list
-        """
-        return models.League.objects.order_by('-name')[:1]
+    model = models.League
 
 
-def regular_season(request, league_id):
-    """ Implements regular season view by rolling through all
-        league's conferences and divisions and by creating a
-        regular season schedule and filling it out with days and matches.
-        Returns HttpResponse whose content is the regular season schedule
-        day by day
+class RegularSeasonView(generic.DetailView):
+    """ Implements regular season view via a generic detail view
 
-    :param request: HTTP request
-    :param league_id: league identifier
-    :return: HttpResponse with regular season schedule
-    :rtype: HttpResponse object
     """
+    # Class variables
+    model = models.League
+    template_name = 'ncl_app/regular_season.html'
 
-    league = get_object_or_404(models.League, pk=league_id)
-    for conference in league.conference_set.all():
-        for division in conference.division_set.all():
-            division.create_regular_season_schedule()
-
-    context = {'schedule_list': models.Schedule.objects.all(), 'league': league}
-    return render(request, 'ncl_app/regular_season.html', context)
-
-
-def regular_season_day(request, league_id):
-    """ Implements regular season day view by rolling through all
-        league's conferences and divisions and by playing a
-        regular season schedule.
-        Returns HttpResponse whose content is the current day with
-        matches' results and updated table
+    def get_context_data(self, **kwargs):
+        """ returns the context data """
+        context = super().get_context_data(**kwargs)
+        league = context.get('league')
+        league.create_regular_season()
+        context['schedule_list'] = models.Schedule.objects.all()
+        return context
 
 
-    :param request: HTTP request
-    :param league_id: league identifier
-    :return: HttpResponse with regular season's current day results
-    :rtype: HttpResponse object
+class RegularSeasonDayView(generic.DetailView):
+    """ Implements regular season day view via a generic detail view
+
     """
-    league = get_object_or_404(models.League, pk=league_id)
-    for conference in league.conference_set.all():
-        for division in conference.division_set.all():
-            division.play_regular_season_schedule()
+    # Class variables
+    model = models.League
+    template_name = 'ncl_app/regular_season_day.html'
 
-    context = {'schedule_list': models.Schedule.objects.all(), 'league': league}
-    return render(request, 'ncl_app/regular_season_day.html', context)
+    def get_context_data(self, **kwargs):
+        """ returns the context data """
+        context = super().get_context_data(**kwargs)
+        league = context.get('league')
+        league.play_regular_season()
+        context['schedule_list'] = models.Schedule.objects.all()
+        return context

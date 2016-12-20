@@ -4,11 +4,8 @@
 
 {% if league_list %}
     {% for league in league_list %}
-        <h1>{{ league.name }}</h1>
-        <form action="{% url 'ncl_app:regular_season' league.id %}" method="post">
-            {% csrf_token %}
-            <input type="submit" value="Create Regular Season Schedule" />
-        </form>
+        <h1><a href="{% url 'ncl_app:index' %}">{{ league.name }}</a></h1>
+        <h2><a href="{% url 'ncl_app:regular_season' league.id %}">Create Regular Season</a></h2>
         <table border="3" cellpadding="10" cellspacing="10">
             <tr>
                 {% for conference in league.conference_set.all %}

@@ -3,11 +3,8 @@
 <link rel="stylesheet" type="text/css" href="{% static 'ncl_app/style.css' %}" />
 
 {% if league %}
-    <h1>{{ league.name }} - Regular Season</h1>
-    <form action="{% url 'ncl_app:regular_season_day' league.id %}" method="post">
-        {% csrf_token %}
-        <input type="submit" value="Play Regular Season Schedule" />
-    </form>
+    <h1><a href="{% url 'ncl_app:index' %}">{{ league.name }} - Regular Season</a></h1>
+    <h2><a href="{% url 'ncl_app:regular_season_day' league.id %}">Play Regular Season</a></h2>
 {% else %}
     <h1>Regular Season</h1>
 {% endif %}
