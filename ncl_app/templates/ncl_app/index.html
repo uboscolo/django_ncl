@@ -1,43 +1,93 @@
 {% load static %}
 
+<html lang="en-us" >
+<head>
+<title>Ncl_App</title>
 <!--<link rel="stylesheet" type="text/css" href="{% static 'ncl_app/style.css' %}" />-->
 <link rel="stylesheet" type="text/css" href="{% static 'admin/css/base.css' %}" />
 <link rel="stylesheet" type="text/css" href="{% static 'admin/css/dashboard.css' %}" />
+</head>
 
-{% if league_list %}
-    {% for league in league_list %}
-        <h1><a href="{% url 'ncl_app:index' %}">{{ league.name }}</a></h1>
-        <h2><a href="{% url 'ncl_app:regular_season' league.id %}">Create Regular Season</a></h2>
-        <table border="3" cellpadding="10" cellspacing="10">
-            <tr>
-                {% for conference in league.conference_set.all %}
-                    <th>{{ conference.name }}</th>
-                {% endfor %}
-            </tr>
-            <tr>
-                {% for conference in league.conference_set.all %}
-                    <td>
-                        <table border="1" cellpadding="10" cellspacing="10">
+<body class=" dashboard app-ncl_app"
+  data-admin-utc-offset="-18000">
+
+<!-- Container -->
+<div id="container">
+    <!-- Header -->
+    <div id="header">
+        <div id="branding">
+            <h1 id="site-name"><a href="/ncl_app/">Ncl App</a></h1>
+        </div>
+        <div id="user-tools">
+                Welcome,
+                <strong>player</strong>.
+                <!--<a href="/">View site</a> /-->
+                <!--<a href="/admin/password_change/">Change password</a> /-->
+                <!--<a href="/admin/logout/">Log out</a>-->
+        </div>
+    </div>
+    <!-- END Header -->
+
+    <!--<div class="breadcrumbs">-->
+    <!--<a href="/ncl_app/">Home</a>-->
+    <!--&rsaquo;-->
+
+    <!--Ncl_App-->
+
+    <!--</div>-->
+
+    {% if league_list %}
+        {% for league in league_list %}
+            <!-- Content -->
+            <div id="content" class="colMS">
+                <h1>{{ league.name }}
+                    <a href="{% url 'ncl_app:regular_season' league.id %}"
+                       class="button" style="float:right"
+                       title="Regular Season creation">Create Regular Season
+                    </a>
+                </h1>
+                <div id="content-main">
+                    <div class="app-ncl_app module">
+                        <table border="3" cellpadding="10" cellspacing="10">
+                            <caption>
+                                Conferences and divisions
+                            </caption>
                             <tr>
-                                {% for division in conference.division_set.all %}
-                                    <th>{{ division.name }}</th>
+                                {% for conference in league.conference_set.all %}
+                                    <th>{{ conference.name }}</th>
                                 {% endfor %}
                             </tr>
                             <tr>
-                                {% for division in conference.division_set.all %}
+                                {% for conference in league.conference_set.all %}
                                     <td>
-                                        {% for team in division.team_set.all %}
-                                            <p>{{ team.name }}</p>
-                                        {% endfor %}
+                                        <table border="1" cellpadding="10" cellspacing="10">
+                                            <tr>
+                                                {% for division in conference.division_set.all %}
+                                                    <th>{{ division.name }}</th>
+                                                {% endfor %}
+                                            </tr>
+                                            <tr>
+                                                {% for division in conference.division_set.all %}
+                                                    <td>
+                                                        {% for team in division.team_set.all %}
+                                                            <p>{{ team.name }}</p>
+                                                        {% endfor %}
+                                                    </td>
+                                                {% endfor %}
+                                            </tr>
+                                        </table>
                                     </td>
                                 {% endfor %}
                             </tr>
                         </table>
-                    </td>
-                {% endfor %}
-            </tr>
-        </table>
-    {% endfor %}
-{% else %}
-    <h1>No leagues are available.</h1>
-{% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <h1>No leagues are available.</h1>
+    {% endif %}
+</div>
+<!-- END Container -->
+</body>
+</html>

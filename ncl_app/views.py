@@ -47,9 +47,40 @@ class RegularSeasonDayView(generic.DetailView):
         if not completed:
             context['schedule_list'] = models.Schedule.objects.all()
         else:
-            if league.postseason:
-                # create playoffs
-                pass
             context['division_list'] = models.Division.objects.all()
+        return context
 
+
+class RegularSeasonOverView(generic.DetailView):
+    """ Implements regular season over view via a generic detail view
+
+    """
+    # Class variables
+    model = models.League
+    template_name = 'ncl_app/regular_season_over.html'
+
+    def get_context_data(self, **kwargs):
+        """ returns the context data """
+        context = super().get_context_data(**kwargs)
+        league = context.get('league')
+        if league.postseason:
+            league.create_post_season()
+            context['schedule_list'] = models.Schedule.objects.all()
+        return context
+
+
+class PostSeasonDayView(generic.DetailView):
+    """ Implements post season view via a generic detail view
+
+    """
+    # Class variables
+    model = models.League
+    template_name = 'ncl_app/post_season_day.html'
+
+    def get_context_data(self, **kwargs):
+        """ returns the context data """
+        context = super().get_context_data(**kwargs)
+        league = context.get('league')
+        league.play_post_season()
+        context['schedule_list'] = models.Schedule.objects.all()
         return context
