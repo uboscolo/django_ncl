@@ -41,10 +41,10 @@
             <!-- Content -->
             <div id="content" class="colMS">
                 <h1>{{ league.name }}
-                    <a href="{% url 'ncl_app:regular_season' league.id %}"
-                       class="button" style="float:right"
-                       title="Regular Season creation">Create Regular Season
-                    </a>
+                   <form action="{% url 'ncl_app:create_regular_season' league.id %}" method="post">
+                   {% csrf_token %}
+                       <input type="submit" value="Create Regular Season" />
+                   </form>
                 </h1>
                 <div id="content-main">
                     <div class="app-ncl_app module">

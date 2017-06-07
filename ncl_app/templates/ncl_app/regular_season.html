@@ -28,60 +28,57 @@
     </div>
     <!-- END Header -->
 
-    {% if league %}
-        <div class="breadcrumbs">
-            <a href="{% url 'ncl_app:index' %}">{{ league.name }}</a>
-            &rsaquo;
-            Regular Season
-        </div>
-    {% else %}
-        <h1>No league available</h1>
-    {% endif %}
-
-    {% if schedule_list %}
-        <div id="content" class="colMS">
-            <h1>Regular Season
-                <a href="{% url 'ncl_app:regular_season_day' league.id %}"
-                   class="button" style="float:right"
-                   title="Regular Season play">Play Regular Season
-                </a>
-            </h1>
-            <div id="content-main">
-                <div class="app-ncl_app module">
-                    <table border="3" cellpadding="10" cellspacing="10">
-                        <caption>
-                           Regular Season Schedules
-                        </caption>
-                        <tr>
-                            {% for schedule in schedule_list %}
-                                <th>{{ schedule.name }}</th>
-                            {% endfor %}
-                        </tr>
-                        <tr>
-                            {% for schedule in schedule_list %}
-                                <td>
-                                    <table border="1" cellpadding="10" cellspacing="10">
-                                        {% for day in schedule.sorted_day_set.all %}
-                                            <tr>
-                                                <th>Day {{ day.number }}</th>
-                                            </tr>
-                                            {% for match in day.match_set.all %}
-                                                <tr>
-                                                    <td>{{ match.home_team.name }}<br>vs.<br>
-                                                        {{ match.away_team.name }}</td>
-                                                </tr>
-                                            {% endfor %}
-                                        {% endfor %}
-                                    </table>
-                                </td>
-                            {% endfor %}
-                        </tr>
-                    </table>
+    {% if league_list %}
+        {% for league in league_list %}
+            <!-- Content -->
+            <div id="content" class="colMS">
+                <h1>{{ league.name }}
+                   <form action="{% url 'ncl_app:play_regular_season' league.id %}" method="post">
+                   {% csrf_token %}
+                       <input type="submit" value="Play Regular Season" />
+                   </form>
+                </h1>
+                <div id="content-main">
+                    <div class="app-ncl_app module">
+                        <table border="3" cellpadding="10" cellspacing="10">
+                            <caption>
+                                Regular Season Schedules
+                            </caption>
+                            <tr>
+                                {% for conference in league.conference_set.all %}
+                                    {% for division in conference.division_set.all %}
+                                        <th>{{ division.schedule.name }}</th>
+                                    {% endfor %}
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                {% for conference in league.conference_set.all %}
+                                    {% for division in conference.division_set.all %}
+                                        <td>
+                                            <table border="1" cellpadding="10" cellspacing="10">
+                                                {% for day in division.schedule.sorted_day_set.all %}
+                                                    <tr>
+                                                        <th>Day {{ day.number }}</th>
+                                                    </tr>
+                                                    {% for match in day.match_set.all %}
+                                                        <tr>
+                                                            <td>{{ match.home_team.name }}<br>vs.<br>
+                                                                {{ match.away_team.name }}</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                {% endfor %}
+                                            </table>
+                                        </td>
+                                    {% endfor %}
+                                {% endfor %}
+                            </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
+        {% endfor %}
     {% else %}
-        <h1>No schedules are available.</h1>
+        <h1>No leagues are available.</h1>
     {% endif %}
 </div>
 <!-- END Container -->

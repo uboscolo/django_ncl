@@ -495,7 +495,7 @@ class Series(models.Model):
     teams = models.ManyToManyField(Team, through='SeriesPart')
     matches = models.ManyToManyField(Match)
     length = models.IntegerField(default=3)
-    schedule = models.ForeignKey(Schedule)
+    schedule = models.ForeignKey(Schedule, null=True)
 
     class Meta:
         """ Meta class """
