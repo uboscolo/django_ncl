@@ -35,6 +35,19 @@ def play_regular_season(request, pk):
     else:
         return HttpResponseRedirect(reverse('ncl_app:regular_season_day'))
 
+def play_post_season(request, pk):
+    """ Handles post season games
+    """
+    league = get_object_or_404(models.League, pk=pk)
+    completed = league.play_post_season()
+    # Always return an HttpResponseRedirect after successfully dealing
+    # with POST data. This prevents data from being posted twice if a
+    # user hits the Back button.
+    if completed:
+        return HttpResponseRedirect(reverse('ncl_app:post_season_over'))
+    else:
+        return HttpResponseRedirect(reverse('ncl_app:post_season_day'))
+
 
 class IndexView(generic.ListView):
     """ Implements index view via a generic list view
@@ -72,6 +85,15 @@ class RegularSeasonOverView(generic.ListView):
     model = models.League
 
 
+class PostSeasonView(generic.ListView):
+    """ Implements post season view via a generic list view
+
+    """
+    # Class variables
+    template_name = 'ncl_app/post_season.html'
+    model = models.League
+
+
 class PostSeasonDayView(generic.ListView):
     """ Implements post season day view via a generic list view
 
@@ -80,6 +102,14 @@ class PostSeasonDayView(generic.ListView):
     template_name = 'ncl_app/post_season_day.html'
     model = models.League
 
+
+class PostSeasonOverView(generic.ListView):
+    """ Implements post season over view via a generic list view
+
+    """
+    # Class variables
+    template_name = 'ncl_app/post_season_over.html'
+    model = models.League
 
 
 #class RegularSeasonView(generic.DetailView):

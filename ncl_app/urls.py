@@ -9,5 +9,8 @@ urlpatterns = [
     url(r'^regular_season_day/$', views.RegularSeasonDayView.as_view(), name='regular_season_day'),
     url(r'^(?P<pk>[0-9]+)/play_regular_season/$', views.play_regular_season, name='play_regular_season'),
     url(r'^regular_season_over/$', views.RegularSeasonOverView.as_view(), name='regular_season_over'),
-    url(r'^(?P<pk>[0-9]+)/post_season_day/$', views.PostSeasonDayView.as_view(), name='post_season_day'),
+    url(r'^post_season/$', views.PostSeasonView.as_view(), name='post_season'),
+    url(r'^(?P<pk>[0-9]+)/play_post_season/$', views.play_post_season, name='play_post_season'),
+    url(r'^post_season_day/$', views.PostSeasonDayView.as_view(), name='post_season_day'),
+    url(r'^post_season_over/$', views.PostSeasonOverView.as_view(), name='post_season_over'),
 ]
